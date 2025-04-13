@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Unknown Shader - Advanced Shader Creator</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+            "monaco-editor": "https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/editor/editor.main.js"
+        }
+    }
+    </script>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="logo">The Unknown Shader</div>
+            <nav>
+                <button id="newProject">New</button>
+                <button id="saveProject">Save</button>
+                <button id="exportProject">Export</button>
+                <button id="importProject">Import</button>
+                <button id="helpButton">Help</button>
+            </nav>
+            <div class="user-profile">
+                <span id="userName">Guest User</span>
+                <div class="avatar"></div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="panel-header">
+                    <h3>Assets & Templates</h3>
+                </div>
+                <div class="panel-tabs">
+                    <button class="tab-btn active" data-target="assets-tab">Assets</button>
+                    <button class="tab-btn" data-target="templates-tab">Templates</button>
+                </div>
+                <div class="panel-content">
+                    <div id="assets-tab" class="tab-content active">
+                        <div class="asset-categories">
+                            <button class="category-btn active" data-category="textures">Textures</button>
+                            <button class="category-btn" data-category="models">3D Models</button>
+                            <button class="category-btn" data-category="hdri">HDRI</button>
+                        </div>
+                        <div class="asset-library">
+                            <!-- Assets will be loaded here -->
+                        </div>
+                        <button id="uploadAsset" class="upload-btn">Upload New Asset</button>
+                    </div>
+                    <div id="templates-tab" class="tab-content">
+                        <div class="template-categories">
+                            <button class="category-btn active" data-category="materials">Materials</button>
+                            <button class="category-btn" data-category="effects">Effects</button>
+                            <button class="category-btn" data-category="environments">Environments</button>
+                        </div>
+                        <div class="template-library">
+                            <!-- Templates will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="center-panel">
+                <div class="viewport-container">
+                    <canvas id="viewport"></canvas>
+                    <div class="viewport-controls">
+                        <button id="resetCamera" title="Reset Camera"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z"/></svg></button>
+                        <button id="toggleWireframe" title="Toggle Wireframe"><svg viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm16 16V5H5v14h14zM11 7h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z"/></svg></button>
+                        <button id="takeScreenshot" title="Take Screenshot"><svg viewBox="0 0 24 24"><path d="M12 15.2C13.7 15.2 15.2 13.7 15.2 12C15.2 10.3 13.7 8.8 12 8.8C10.3 8.8 8.8 10.3 8.8 12C8.8 13.7 10.3 15.2 12 15.2ZM9 2L7.17 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4H16.83L15 2H9ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17Z"/></svg></button>
+                    </div>
+                </div>
+                <div class="scene-hierarchy">
+                    <div class="panel-header">
+                        <h3>Scene Hierarchy</h3>
+                    </div>
+                    <ul id="sceneTree">
+                        <!-- Scene objects will be listed here -->
+                    </ul>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="panel-header">
+                    <h3>Shader Editor</h3>
+                    <div class="editor-mode-toggle">
+                        <button id="codeViewBtn" class="active">Code</button>
+                        <button id="nodeViewBtn">Nodes</button>
+                    </div>
+                </div>
+                <div class="editor-container">
+                    <div id="codeEditor" class="active">
+                        <div class="editor-tabs">
+                            <button class="editor-tab active" data-shader="vertex">Vertex</button>
+                            <button class="editor-tab" data-shader="fragment">Fragment</button>
+                        </div>
+                        <div id="monaco-editor"></div>
+                        <div class="editor-toolbar">
+                            <button id="runShader">Run Shader</button>
+                            <button id="formatCode">Format</button>
+                            <button id="askLLM" class="llm-btn">Ask AI Helper</button>
+                        </div>
+                    </div>
+                    <div id="nodeEditor">
+                        <!-- Node-based editor will be implemented here -->
+                        <div class="node-canvas"></div>
+                        <div class="node-palette">
+                            <div class="node-category">
+                                <h4>Inputs</h4>
+                                <div class="node-list">
+                                    <div class="node-item" draggable="true" data-node-type="texture">Texture</div>
+                                    <div class="node-item" draggable="true" data-node-type="color">Color</div>
+                                    <div class="node-item" draggable="true" data-node-type="vector">Vector</div>
+                                </div>
+                            </div>
+                            <div class="node-category">
+                                <h4>Operations</h4>
+                                <div class="node-list">
+                                    <div class="node-item" draggable="true" data-node-type="mix">Mix</div>
+                                    <div class="node-item" draggable="true" data-node-type="noise">Noise</div>
+                                    <div class="node-item" draggable="true" data-node-type="math">Math</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="properties-panel">
+                    <div class="panel-header">
+                        <h3>Properties</h3>
+                    </div>
+                    <div id="propertiesContent">
+                        <!-- Properties of selected objects will be shown here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="llmHelperModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>AI Shader Assistant</h2>
+                    <span class="close-modal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="chat-container">
+                        <div class="chat-messages" id="llmChatMessages">
+                            <div class="message system-message">
+                                <div class="message-content">
+                                    <p>Hello! I'm your shader assistant. I can help you with writing shader code, understanding concepts, or troubleshooting issues. What would you like help with today?</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-input">
+                            <textarea id="llmInput" placeholder="Ask anything about shaders..."></textarea>
+                            <button id="sendToLLM">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
+
