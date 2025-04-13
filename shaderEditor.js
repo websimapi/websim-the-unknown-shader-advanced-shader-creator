@@ -38,15 +38,28 @@ void main() {
         // Add loading indicator
         this.editorContainer.innerHTML = '<div class="monaco-loading">Loading editor...</div>';
         
-        // Configure Monaco loader
-        window.require.config({ 
-            paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs' }
-        });
+        // Load Monaco Editor using script tag approach for better compatibility
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs/loader.js';
+        script.onload = () => {
+            // Configure RequireJS
+            window.require.config({
+                paths: {
+                    'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs'
+                }
+            });
+            
+            // Load Monaco Editor
+            window.require(['vs/editor/editor.main'], () => {
+                this.setupMonacoEditor();
+            });
+        };
+        script.onerror = (err) => {
+            console.error('Failed to load Monaco Editor:', err);
+            this.editorContainer.innerHTML = '<div class="monaco-loading">Failed to load editor. Please refresh the page.</div>';
+        };
         
-        // Load Monaco modules
-        window.require(['vs/editor/editor.main'], () => {
-            this.setupMonacoEditor();
-        });
+        document.body.appendChild(script);
     }
 
     setupMonacoEditor() {
@@ -114,19 +127,24 @@ void main() {
             ]
         });
 
-        // Create editor instance
-        this.editor = monaco.editor.create(this.editorContainer, {
-            value: this.fragmentCode,
-            language: 'glsl',
-            theme: 'vs-dark',
-            automaticLayout: true,
-            minimap: {
-                enabled: false
-            }
-        });
+        try {
+            // Create editor instance
+            this.editor = monaco.editor.create(this.editorContainer, {
+                value: this.fragmentCode,
+                language: 'glsl',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                minimap: {
+                    enabled: false
+                }
+            });
 
-        // Show the initial shader
-        this.showShader(this.activeTab);
+            // Show the initial shader
+            this.showShader(this.activeTab);
+        } catch (error) {
+            console.error('Error creating Monaco editor:', error);
+            this.editorContainer.innerHTML = `<div class="monaco-loading">Error initializing editor: ${error.message}</div>`;
+        }
     }
 
     setupEvents() {
@@ -146,21 +164,25 @@ void main() {
         this.saveCurrentShader();
         
         // Load appropriate shader into editor
-        if (type === 'vertex') {
-            this.editor.setValue(this.vertexCode);
-        } else {
-            this.editor.setValue(this.fragmentCode);
+        if (this.editor) {
+            if (type === 'vertex') {
+                this.editor.setValue(this.vertexCode);
+            } else {
+                this.editor.setValue(this.fragmentCode);
+            }
+            
+            this.activeTab = type;
         }
-        
-        this.activeTab = type;
     }
 
     saveCurrentShader() {
-        const currentValue = this.editor.getValue();
-        if (this.activeTab === 'vertex') {
-            this.vertexCode = currentValue;
-        } else {
-            this.fragmentCode = currentValue;
+        if (this.editor) {
+            const currentValue = this.editor.getValue();
+            if (this.activeTab === 'vertex') {
+                this.vertexCode = currentValue;
+            } else {
+                this.fragmentCode = currentValue;
+            }
         }
     }
 
