@@ -257,6 +257,16 @@ nav button:hover {
     min-height: 200px;
 }
 
+.monaco-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background-color: var(--panel-bg);
+    color: var(--text-color);
+    font-style: italic;
+}
+
 .editor-toolbar {
     padding: 5px;
     display: flex;
@@ -276,6 +286,31 @@ nav button:hover {
 .llm-btn {
     margin-left: auto;
     background-color: var(--highlight-color) !important;
+}
+
+.status-message {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: white;
+    opacity: 1;
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 100;
+}
+
+.status-message.success {
+    background-color: var(--success-color);
+}
+
+.status-message.error {
+    background-color: var(--error-color);
+}
+
+.status-message.fade-out {
+    opacity: 0;
+    transform: translateY(-10px);
 }
 
 /* Node Editor */
@@ -475,3 +510,26 @@ nav button:hover {
     cursor: pointer;
 }
 
+.code-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 5px;
+}
+
+.code-btn {
+    background-color: var(--highlight-color);
+    border: none;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.85em;
+}
+
+.copy-btn {
+    background-color: var(--primary-color);
+}
+
+.apply-btn {
+    background-color: var(--success-color);
+}
