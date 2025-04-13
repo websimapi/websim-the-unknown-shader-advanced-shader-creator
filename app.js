@@ -8,13 +8,26 @@ import { AssetManager } from './assetManager.js';
 
 class App {
     constructor() {
-        this.initThreeJS();
-        this.initEditors();
-        this.initAssets();
-        this.initTemplates();
-        this.initLLMHelper();
-        this.setupEventListeners();
-        this.animate();
+        // Ensure we don't initialize the app until the DOM is fully loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.init());
+        } else {
+            this.init();
+        }
+    }
+
+    init() {
+        try {
+            this.initThreeJS();
+            this.initEditors();
+            this.initAssets();
+            this.initTemplates();
+            this.initLLMHelper();
+            this.setupEventListeners();
+            this.animate();
+        } catch (error) {
+            console.error('Error initializing app:', error);
+        }
     }
 
     initThreeJS() {
@@ -344,8 +357,11 @@ class App {
     }
 }
 
-// Initialize app when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    new App();
+// Create app instance
+window.addEventListener('DOMContentLoaded', () => {
+    try {
+        window.app = new App();
+    } catch (error) {
+        console.error('Error creating app:', error);
+    }
 });
-
