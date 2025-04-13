@@ -43,7 +43,7 @@ Be helpful, precise, and technically accurate. Users rely on your expertise for 
         
         try {
             // Get currently selected code if any
-            const selectedCode = this.shaderEditor.getSelectedCode();
+            const selectedCode = this.shaderEditor ? this.shaderEditor.getSelectedCode() : '';
             
             // Prepare user message with code context if available
             let messageContent = userMessage;
@@ -77,27 +77,36 @@ Be helpful, precise, and technically accurate. Users rely on your expertise for 
         } catch (error) {
             console.error('Error querying LLM:', error);
             this.hideThinking();
-            this.addMessageToChat('Sorry, there was an error processing your request.', 'system');
+            this.addMessageToChat('Sorry, there was an error processing your request. Please try again.', 'system');
         }
     }
 
     async callLLM() {
-        // In a real implementation, this would call an actual LLM API
-        // For this prototype, we're simulating the LLM response
-        
-        // This would normally use the websim.chat.completions.create call
-        const completion = await websim.chat.completions.create({
-            messages: [
-                this.systemMessage,
-                ...this.conversationHistory
-            ]
-        });
-        
-        return completion;
+        try {
+            // This would normally use the websim.chat.completions.create call
+            const completion = await websim.chat.completions.create({
+                messages: [
+                    this.systemMessage,
+                    ...this.conversationHistory
+                ]
+            });
+            
+            return completion;
+        } catch (error) {
+            console.error('LLM API error:', error);
+            return {
+                content: "I'm having trouble connecting to my knowledge base right now. Please try again in a moment."
+            };
+        }
     }
 
     addMessageToChat(message, role) {
         const chatMessages = document.getElementById('llmChatMessages');
+        if (!chatMessages) {
+            console.error('Chat messages container not found');
+            return;
+        }
+        
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${role}-message`;
         
@@ -132,9 +141,11 @@ Be helpful, precise, and technically accurate. Users rely on your expertise for 
             applyButton.textContent = 'Apply to Selection';
             applyButton.className = 'code-btn apply-btn';
             applyButton.addEventListener('click', () => {
-                this.shaderEditor.replaceSelectedCode(codeBlock.textContent);
-                applyButton.textContent = 'Applied!';
-                setTimeout(() => { applyButton.textContent = 'Apply to Selection'; }, 2000);
+                if (this.shaderEditor) {
+                    this.shaderEditor.replaceSelectedCode(codeBlock.textContent);
+                    applyButton.textContent = 'Applied!';
+                    setTimeout(() => { applyButton.textContent = 'Apply to Selection'; }, 2000);
+                }
             });
             
             buttonContainer.appendChild(copyButton);
@@ -165,6 +176,8 @@ Be helpful, precise, and technically accurate. Users rely on your expertise for 
 
     showThinking() {
         const chatMessages = document.getElementById('llmChatMessages');
+        if (!chatMessages) return;
+        
         const thinkingDiv = document.createElement('div');
         thinkingDiv.className = 'message system-message thinking';
         thinkingDiv.innerHTML = '<div class="message-content">Thinking...</div>';
@@ -180,4 +193,3 @@ Be helpful, precise, and technically accurate. Users rely on your expertise for 
         }
     }
 }
-

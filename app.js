@@ -27,7 +27,28 @@ class App {
             this.animate();
         } catch (error) {
             console.error('Error initializing app:', error);
+            this.showGlobalError('Failed to initialize application. Check console for details.');
         }
+    }
+
+    showGlobalError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.style.position = 'fixed';
+        errorDiv.style.top = '50%';
+        errorDiv.style.left = '50%';
+        errorDiv.style.transform = 'translate(-50%, -50%)';
+        errorDiv.style.backgroundColor = 'rgba(204, 0, 0, 0.9)';
+        errorDiv.style.color = 'white';
+        errorDiv.style.padding = '20px';
+        errorDiv.style.borderRadius = '5px';
+        errorDiv.style.zIndex = '10000';
+        errorDiv.textContent = message;
+        
+        document.body.appendChild(errorDiv);
+        
+        setTimeout(() => {
+            errorDiv.remove();
+        }, 5000);
     }
 
     initThreeJS() {
@@ -357,11 +378,22 @@ class App {
     }
 }
 
-// Create app instance
+// Create app instance with error handling
 window.addEventListener('DOMContentLoaded', () => {
     try {
         window.app = new App();
+        
+        // Global error handler for unhandled promise rejections
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Unhandled promise rejection:', event.reason);
+        });
+        
+        // Global error handler
+        window.addEventListener('error', (event) => {
+            console.error('Global error:', event.error);
+        });
     } catch (error) {
-        console.error('Error creating app:', error);
+        console.error('Critical error creating app:', error);
+        alert('Failed to initialize the application. Please check your browser console for details.');
     }
 });
